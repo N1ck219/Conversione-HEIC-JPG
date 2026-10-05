@@ -1,18 +1,18 @@
-# Convertitore HEIC → JPG
-
-Piccolo programma con interfaccia grafica: indichi una cartella, scegli quali foto HEIC convertire e le salva come JPG.
+# Convertitore HEIC → JPG (pagina web locale)
 
 ## Installazione
-Serve Python 3.9+ (con tkinter, incluso nell'installer ufficiale di Windows/macOS).
+Serve Python 3.9+.
 
     pip install -r requirements.txt
 
 ## Uso
-    python heic_converter.py
+    python app.py
 
-1. Incolla il percorso della cartella (o "Sfoglia…") e premi **Carica**.
-2. Scegli le foto: Ctrl/Shift+clic, **Seleziona tutte**, oppure **Prime N**.
-3. (Opzionale) cambia cartella di destinazione (di default `<cartella>/jpg`) e qualità.
-4. Premi **Converti selezionate**.
+Si apre il browser su http://127.0.0.1:8765 (il server è raggiungibile solo dal tuo computer).
+
+1. **Cartella di input** → "Sfoglia…" per navigare tra le cartelle (o incolla il percorso) → "Carica": compaiono le miniature delle foto HEIC.
+2. Scegli le foto cliccando le miniature (Shift+clic per un intervallo), oppure "Seleziona tutte" / "Prime N".
+3. **Cartella di output** → "Sfoglia…": dentro la posizione scelta viene sempre creata la cartella `Foto convertite`.
+4. "Converti selezionate".
 
 I file esistenti non vengono sovrascritti (si aggiunge `_1`, `_2`…). Orientamento ed EXIF sono mantenuti.

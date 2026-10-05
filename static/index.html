@@ -1,0 +1,217 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Convertitore HEIC → JPG</title>
+<style>
+  :root { --bg:#f5f6f8; --card:#fff; --text:#1c1f24; --muted:#6b7280; --accent:#2563eb; --border:#d9dde3; --sel:#dbeafe; }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg:#16181d; --card:#1f232a; --text:#e8eaed; --muted:#9aa3af; --accent:#5b8cff; --border:#343a44; --sel:#1e3a66; }
+  }
+  * { box-sizing: border-box; }
+  body { margin:0; font:15px system-ui,sans-serif; background:var(--bg); color:var(--text); }
+  main { max-width:1100px; margin:0 auto; padding:16px; }
+  h1 { font-size:20px; margin:4px 0 14px; }
+  .card { background:var(--card); border:1px solid var(--border); border-radius:10px; padding:14px; margin-bottom:12px; }
+  .row { display:flex; gap:8px; align-items:center; flex-wrap:wrap; }
+  .row + .row { margin-top:10px; }
+  label.lbl { width:150px; font-weight:600; }
+  input[type=text] { flex:1; min-width:200px; padding:8px 10px; border:1px solid var(--border); border-radius:6px; background:var(--bg); color:var(--text); }
+  button { padding:8px 14px; border:1px solid var(--border); border-radius:6px; background:var(--card); color:var(--text); cursor:pointer; font:inherit; }
+  button:hover { border-color:var(--accent); }
+  button.primary { background:var(--accent); border-color:var(--accent); color:#fff; font-weight:600; }
+  button:disabled { opacity:.5; cursor:default; }
+  .hint { color:var(--muted); font-size:13px; }
+  #grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(140px,1fr)); gap:10px; margin-top:12px; }
+  .thumb { position:relative; border:2px solid transparent; border-radius:8px; background:var(--bg); cursor:pointer; overflow:hidden; user-select:none; }
+  .thumb img { width:100%; aspect-ratio:1; object-fit:cover; display:block; background:#8884; }
+  .thumb span { display:block; font-size:12px; padding:4px 6px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .thumb.sel { border-color:var(--accent); background:var(--sel); }
+  .thumb.sel::after { content:"✓"; position:absolute; top:6px; right:6px; background:var(--accent); color:#fff; width:22px; height:22px; border-radius:50%; text-align:center; line-height:22px; font-size:14px; }
+  .thumb.done { opacity:.55; }
+  progress { width:100%; height:14px; }
+  #status { margin-top:8px; }
+  .err { color:#dc2626; }
+  /* finestra sfoglia cartelle */
+  dialog { border:1px solid var(--border); border-radius:10px; background:var(--card); color:var(--text); width:min(560px,94vw); padding:0; }
+  dialog::backdrop { background:#0007; }
+  .dlg-h { padding:12px 14px; border-bottom:1px solid var(--border); }
+  #dlgPath { font-family:monospace; font-size:13px; word-break:break-all; margin-top:6px; color:var(--muted); }
+  #dlgList { height:320px; overflow:auto; }
+  .dir { padding:8px 14px; cursor:pointer; border-bottom:1px solid var(--border); }
+  .dir:hover { background:var(--sel); }
+  .dlg-f { padding:12px 14px; display:flex; gap:8px; justify-content:flex-end; border-top:1px solid var(--border); }
+</style>
+</head>
+<body>
+<main>
+  <h1>Convertitore HEIC → JPG</h1>
+
+  <div class="card">
+    <div class="row">
+      <label class="lbl">Cartella di input</label>
+      <input type="text" id="inPath" placeholder="Percorso della cartella con le foto HEIC">
+      <button id="inBrowse">Sfoglia…</button>
+      <button id="inLoad">Carica</button>
+    </div>
+    <div class="row">
+      <label class="lbl">Cartella di output</label>
+      <input type="text" id="outPath" placeholder="Dove creare la cartella “Foto convertite”">
+      <button id="outBrowse">Sfoglia…</button>
+    </div>
+    <div class="hint" id="outHint" style="margin-top:6px"></div>
+  </div>
+
+  <div class="card">
+    <div class="row">
+      <button id="selAll">Seleziona tutte</button>
+      <button id="selNone">Deseleziona</button>
+      <span>Prime <input type="number" id="firstN" value="10" min="1" style="width:70px;padding:7px"></span>
+      <button id="selFirst">Seleziona</button>
+      <span style="flex:1"></span>
+      <label>Qualità <input type="range" id="quality" min="50" max="100" value="90"> <b id="qVal">90</b></label>
+    </div>
+    <div class="hint" style="margin-top:6px">Clicca le miniature per sceglierle · Shift+clic per un intervallo.</div>
+    <div id="grid"></div>
+  </div>
+
+  <div class="card">
+    <div class="row">
+      <button class="primary" id="convert" disabled>Converti selezionate (0)</button>
+      <progress id="prog" value="0" max="1" hidden></progress>
+    </div>
+    <div id="status" class="hint"></div>
+  </div>
+</main>
+
+<dialog id="dlg">
+  <div class="dlg-h"><b id="dlgTitle">Scegli cartella</b><div id="dlgPath"></div></div>
+  <div id="dlgList"></div>
+  <div class="dlg-f">
+    <button id="dlgCancel">Annulla</button>
+    <button class="primary" id="dlgOk">Scegli questa cartella</button>
+  </div>
+</dialog>
+
+<script>
+const $ = id => document.getElementById(id);
+const OUT_NAME = "Foto convertite";
+let files = [], selected = new Set(), lastClicked = null, loadedFolder = "";
+
+async function api(url, body) {
+  const r = await fetch(url, body ? {method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify(body)} : {});
+  const d = await r.json().catch(() => ({error:"risposta non valida"}));
+  if (!r.ok) throw new Error(d.error || r.statusText);
+  return d;
+}
+const sep = p => p.includes("\\") ? "\\" : "/";
+function setStatus(msg, err) { $("status").textContent = msg; $("status").className = err ? "err" : "hint"; }
+
+// ---- finestra "Sfoglia"
+let dlgCurrent = "", dlgTarget = null;
+async function dlgGo(path) {
+  try {
+    const d = await api("/api/browse?path=" + encodeURIComponent(path));
+    dlgCurrent = d.path;
+    $("dlgPath").textContent = d.path || "(unità)";
+    $("dlgOk").disabled = !d.path;
+    const list = $("dlgList"); list.innerHTML = "";
+    const add = (label, p) => { const e = document.createElement("div"); e.className = "dir"; e.textContent = label; e.onclick = () => dlgGo(p); list.appendChild(e); };
+    if (d.parent !== null) add("⬆ .. (cartella superiore)", d.parent);
+    if (d.home && d.path !== d.home) add("🏠 Cartella personale", d.home);
+    d.dirs.forEach(x => add("📁 " + x.name, x.path));
+    if (!d.dirs.length) { const e = document.createElement("div"); e.className = "dir hint"; e.textContent = "Nessuna sottocartella"; list.appendChild(e); }
+  } catch (e) { alert(e.message); }
+}
+function browseFor(input, title) {
+  dlgTarget = input; $("dlgTitle").textContent = title;
+  $("dlg").showModal(); dlgGo(input.value.trim());
+}
+$("dlgCancel").onclick = () => $("dlg").close();
+$("dlgOk").onclick = () => { dlgTarget.value = dlgCurrent; $("dlg").close(); dlgTarget.dispatchEvent(new Event("change")); };
+
+// ---- input / output
+$("inBrowse").onclick = () => browseFor($("inPath"), "Cartella di input");
+$("outBrowse").onclick = () => browseFor($("outPath"), "Cartella di output");
+$("inPath").onchange = () => { if (!$("outPath").value) $("outPath").value = $("inPath").value; loadFiles(); };
+$("inLoad").onclick = loadFiles;
+$("inPath").onkeydown = e => { if (e.key === "Enter") loadFiles(); };
+function updateOutHint() {
+  const o = $("outPath").value.trim();
+  $("outHint").textContent = o ? `Le foto saranno salvate in: ${o.replace(/[\\/]+$/, "")}${sep(o)}${OUT_NAME}` : "";
+}
+$("outPath").oninput = $("outPath").onchange = updateOutHint;
+
+async function loadFiles() {
+  const folder = $("inPath").value.trim().replace(/^"|"$/g, "");
+  if (!folder) return;
+  try {
+    const d = await api("/api/list?folder=" + encodeURIComponent(folder));
+    files = d.files; loadedFolder = folder; selected.clear(); lastClicked = null;
+    if (!$("outPath").value) $("outPath").value = folder;
+    updateOutHint(); renderGrid();
+    setStatus(files.length ? `Trovate ${files.length} foto HEIC.` : "Nessuna foto HEIC in questa cartella.");
+  } catch (e) { files = []; renderGrid(); setStatus(e.message, true); }
+}
+
+// ---- miniature
+function renderGrid() {
+  const g = $("grid"); g.innerHTML = "";
+  files.forEach((name, i) => {
+    const d = document.createElement("div"); d.className = "thumb"; d.dataset.i = i;
+    const img = document.createElement("img"); img.loading = "lazy"; img.alt = name;
+    img.src = `/api/thumb?folder=${encodeURIComponent(loadedFolder)}&name=${encodeURIComponent(name)}`;
+    const s = document.createElement("span"); s.textContent = name; s.title = name;
+    d.append(img, s);
+    d.onclick = e => clickThumb(i, e.shiftKey);
+    g.appendChild(d);
+  });
+  refresh();
+}
+function clickThumb(i, shift) {
+  if (shift && lastClicked !== null) {
+    const [a, b] = [Math.min(i, lastClicked), Math.max(i, lastClicked)];
+    for (let k = a; k <= b; k++) selected.add(k);
+  } else {
+    selected.has(i) ? selected.delete(i) : selected.add(i);
+    lastClicked = i;
+  }
+  refresh();
+}
+function refresh() {
+  document.querySelectorAll(".thumb").forEach(t => t.classList.toggle("sel", selected.has(+t.dataset.i)));
+  $("convert").textContent = `Converti selezionate (${selected.size})`;
+  $("convert").disabled = !selected.size;
+}
+$("selAll").onclick = () => { files.forEach((_, i) => selected.add(i)); refresh(); };
+$("selNone").onclick = () => { selected.clear(); refresh(); };
+$("selFirst").onclick = () => {
+  selected.clear(); const n = Math.max(0, parseInt($("firstN").value) || 0);
+  for (let i = 0; i < Math.min(n, files.length); i++) selected.add(i);
+  refresh();
+};
+$("quality").oninput = () => $("qVal").textContent = $("quality").value;
+
+// ---- conversione (un file alla volta, per mostrare l'avanzamento)
+$("convert").onclick = async () => {
+  const out = $("outPath").value.trim();
+  if (!out) return setStatus("Scegli la cartella di output.", true);
+  const idx = [...selected].sort((a, b) => a - b);
+  $("convert").disabled = true; $("prog").hidden = false; $("prog").max = idx.length; $("prog").value = 0;
+  let ok = 0, errors = [], outDir = "";
+  for (const [n, i] of idx.entries()) {
+    setStatus(`Converto ${files[i]} (${n + 1}/${idx.length})…`);
+    try {
+      const r = await api("/api/convert", {folder: loadedFolder, out_parent: out, name: files[i], quality: +$("quality").value});
+      outDir = r.out_dir; ok++;
+      document.querySelector(`.thumb[data-i="${i}"]`).classList.add("done");
+    } catch (e) { errors.push(`${files[i]}: ${e.message}`); }
+    $("prog").value = n + 1;
+  }
+  setStatus(`Fatto: ${ok} convertite${errors.length ? ", " + errors.length + " errori (" + errors.slice(0, 3).join("; ") + ")" : ""}. ${outDir ? "Salvate in " + outDir : ""}`, errors.length > 0);
+  refresh();
+};
+</script>
+</body>
+</html>
