@@ -6,5 +6,5 @@ window.SITE = {
   // ID dei blocchi annuncio creati in AdSense (uno per slot).
   adSlots: { left: "", right: "", bottom: "" },
   // Email di contatto mostrata nella pagina privacy.
-  contactEmail: "TUA-EMAIL@esempio.it",
+  contactEmail: "nicola.flego@gmail.com",
 };

@@ -15,7 +15,9 @@
 
   <main>
     <header>
-      <div class="logo">📷</div>
+      <div class="logo" aria-hidden="true">
+        <svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8.5A1.5 1.5 0 0 1 5.5 7h2.2l1.1-1.7A1 1 0 0 1 9.6 4.8h4.8a1 1 0 0 1 .8.5L16.3 7h2.2A1.5 1.5 0 0 1 20 8.5v9A1.5 1.5 0 0 1 18.5 19h-13A1.5 1.5 0 0 1 4 17.5z"/><circle cx="12" cy="12.8" r="3.4"/></svg>
+      </div>
       <div>
         <h1>Convertitore HEIC → JPG</h1>
         <p>Gratis · Le foto restano sul tuo dispositivo, non vengono caricate online.</p>
@@ -26,7 +28,7 @@
       <div class="step"><i>1</i> Aggiungi le foto</div>
       <div class="drop" id="drop" tabindex="0" role="button" aria-label="Scegli le foto HEIC da convertire">
         <b>🖼️</b>
-        <strong>Trascina qui le foto HEIC</strong><br>
+        <strong>Trascina qui le foto HEIC o un'intera cartella</strong><br>
         <span class="hint">oppure clicca per sceglierle dal dispositivo</span>
       </div>
       <input type="file" id="fileInput" accept=".heic,.heif,image/heic,image/heif" multiple hidden>
@@ -35,6 +37,7 @@
         <button id="pickFiles">📄 Scegli file</button>
         <button id="pickDir">📂 Scegli una cartella</button>
         <button id="clearAll" disabled>Svuota elenco</button>
+        <label class="hint"><input type="checkbox" id="autoStart" checked> Avvia subito la conversione</label>
         <span style="flex:1"></span>
         <label>Qualità <input type="range" id="quality" min="50" max="100" value="90"> <b id="qVal">90</b></label>
       </div>

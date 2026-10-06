@@ -26,7 +26,7 @@ main { padding:28px 0 40px; min-width:0; }
 .ad[hidden], .ad-bottom[hidden] { display:none; }
 .ad.preview, .ad-bottom.preview { border:2px dashed var(--border); border-radius:12px; display:grid; place-items:center; color:var(--muted); font-size:12px; }
 header { display:flex; align-items:center; gap:14px; margin-bottom:22px; }
-.logo { width:46px; height:46px; border-radius:14px; background:var(--grad); display:grid; place-items:center; font-size:24px;
+.logo { width:46px; height:46px; flex:none; border-radius:14px; background:var(--grad); display:grid; place-items:center;
   box-shadow:0 6px 18px color-mix(in srgb,var(--accent) 45%,transparent); }
 h1 { font-size:24px; margin:0; letter-spacing:-.02em; line-height:1.2; }
 header p { margin:0; color:var(--muted); font-size:13px; }
@@ -88,3 +88,7 @@ footer a { margin:0 8px; }
   border:1px solid var(--border); border-radius:16px; padding:16px; box-shadow:0 12px 40px rgba(0,0,0,.3); }
 #consent p { margin:0 0 10px; font-size:14px; }
 .page { max-width:760px; margin:0 auto; padding:28px 16px 40px; } .page h2 { margin-top:26px; }
+
+.logo svg { display:block; }
+.thumb.busy .ph, .thumb.busy img { animation:pulse 1s infinite; }
+.thumb .tag.wait { background:rgba(79,70,229,.85); }
