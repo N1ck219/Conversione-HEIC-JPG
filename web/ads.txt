@@ -1,0 +1,2 @@
+# Inserisci qui la riga fornita da AdSense dopo l'approvazione:
+# google.com, pub-XXXXXXXXXXXXXXXX, DIRECT, f08c47fec0942fa0

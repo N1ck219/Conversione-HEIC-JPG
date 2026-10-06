@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Convertitore HEIC in JPG gratis e privato, direttamente nel browser</title>
+<meta name="description" content="Converti le foto HEIC/HEIF dell'iPhone in JPG gratis, senza caricarle online: tutto avviene nel tuo browser. Conversione multipla e download in ZIP.">
+<meta name="theme-color" content="#4f46e5">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E📷%3C/text%3E%3C/svg%3E">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="layout">
+  <aside class="side"><div class="ad" id="adLeft" hidden></div></aside>
+
+  <main>
+    <header>
+      <div class="logo">📷</div>
+      <div>
+        <h1>Convertitore HEIC → JPG</h1>
+        <p>Gratis · Le foto restano sul tuo dispositivo, non vengono caricate online.</p>
+      </div>
+    </header>
+
+    <section class="card">
+      <div class="step"><i>1</i> Aggiungi le foto</div>
+      <div class="drop" id="drop" tabindex="0" role="button" aria-label="Scegli le foto HEIC da convertire">
+        <b>🖼️</b>
+        <strong>Trascina qui le foto HEIC</strong><br>
+        <span class="hint">oppure clicca per sceglierle dal dispositivo</span>
+      </div>
+      <input type="file" id="fileInput" accept=".heic,.heif,image/heic,image/heif" multiple hidden>
+      <input type="file" id="dirInput" webkitdirectory multiple hidden>
+      <div class="row" style="margin-top:12px">
+        <button id="pickFiles">📄 Scegli file</button>
+        <button id="pickDir">📂 Scegli una cartella</button>
+        <button id="clearAll" disabled>Svuota elenco</button>
+        <span style="flex:1"></span>
+        <label>Qualità <input type="range" id="quality" min="50" max="100" value="90"> <b id="qVal">90</b></label>
+      </div>
+      <div id="grid"></div>
+    </section>
+
+    <section class="card">
+      <div class="step"><i>2</i> Converti</div>
+      <div class="row"><button class="primary" id="convert" disabled>Converti (0)</button></div>
+      <div id="progWrap" hidden>
+        <div class="bar running" id="bar"><div id="barFill"></div></div>
+        <div class="stats">
+          <div class="stat"><small>Avanzamento</small><b id="stProg">0/0</b></div>
+          <div class="stat"><small>Tempo trascorso</small><b id="stElapsed">0s</b></div>
+          <div class="stat"><small>Tempo rimanente</small><b id="stLeft">calcolo…</b></div>
+          <div class="stat"><small>Tempo totale stimato</small><b id="stTotal">calcolo…</b></div>
+        </div>
+      </div>
+      <div id="status" class="hint" role="status" style="margin-top:10px"></div>
+      <div id="done" hidden>
+        <div class="tick">✓</div>
+        <div class="txt"><h2>Lavoro finito! 🎉</h2><p id="doneSub"></p></div>
+        <div class="btns">
+          <button class="primary" id="dlZip">⬇ Scarica tutto (ZIP)</button>
+          <button id="saveDir" hidden>📁 Salva in una cartella</button>
+        </div>
+      </div>
+    </section>
+
+    <div class="ad-bottom" id="adBottom" hidden></div>
+
+    <section class="card info">
+      <h2>Come funziona</h2>
+      <p>Trascina le foto <strong>.heic</strong> o <strong>.heif</strong> (il formato predefinito di iPhone e iPad) nella pagina, scegli la qualità e premi <em>Converti</em>. Durante il lavoro vedi tempo trascorso e tempo rimanente stimato; alla fine scarichi i JPG in un unico file ZIP.</p>
+      <h2>Le mie foto sono al sicuro?</h2>
+      <p>Sì. La conversione avviene interamente nel tuo browser: i file non vengono inviati a nessun server. Puoi anche usare il sito senza connessione dopo averlo caricato.</p>
+      <h2>Perché convertire HEIC in JPG?</h2>
+      <p>HEIC occupa meno spazio, ma non tutti i programmi, siti e dispositivi lo aprono (soprattutto Windows e molti servizi online). Il JPG si apre ovunque.</p>
+      <h2>Domande frequenti</h2>
+      <details><summary>Quante foto posso convertire insieme?</summary><p>Non c'è un limite fisso: dipende dalla memoria del tuo dispositivo. Per centinaia di foto grandi conviene farle a gruppi da 50–100.</p></details>
+      <details><summary>I dati EXIF (data, posizione) vengono mantenuti?</summary><p>No: per questioni tecniche la conversione nel browser non copia i metadati. È anche un vantaggio per la privacy, perché il JPG non contiene la posizione GPS. L'orientamento della foto viene invece applicato correttamente.</p></details>
+      <details><summary>Quale qualità scegliere?</summary><p>90 è un ottimo compromesso. Sotto 80 il file è molto più piccolo ma si possono notare artefatti; 100 produce file grandi con poco vantaggio visibile.</p></details>
+      <details><summary>Funziona da telefono?</summary><p>Sì, ma i telefoni sono più lenti e hanno meno memoria: per tante foto è meglio un computer.</p></details>
+      <details><summary>È gratuito?</summary><p>Sì. Il sito si sostiene con la pubblicità mostrata ai lati della pagina.</p></details>
+    </section>
+
+    <footer>
+      <a href="privacy.html">Privacy e cookie</a>
+      <a href="#" id="cookiePrefs">Gestisci consenso pubblicità</a>
+    </footer>
+  </main>
+
+  <aside class="side"><div class="ad" id="adRight" hidden></div></aside>
+</div>
+
+<div id="consent" hidden role="dialog" aria-label="Consenso pubblicità">
+  <p>Questo sito è gratuito grazie alla pubblicità. Se accetti, Google AdSense può usare cookie per mostrare annunci. Se rifiuti, non verranno caricati annunci né cookie di terze parti. Le tue foto non vengono mai inviate a nessuno. <a href="privacy.html">Dettagli</a></p>
+  <div class="row"><button class="primary" id="cAccept">Accetta</button><button id="cReject">Rifiuta</button></div>
+</div>
+
+<script src="site-config.js"></script>
+<script src="lib/heic2any.min.js"></script>
+<script src="lib/jszip.min.js"></script>
+<script src="ads.js"></script>
+<script src="app.js"></script>
+</body>
+</html>

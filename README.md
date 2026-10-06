@@ -4,6 +4,8 @@ Piccola app che gira nel browser (in locale, sul tuo computer): scegli una carte
 vedi le miniature, selezioni quali convertire e le salva come JPG in una cartella `Foto convertite`.
 Le foto non vengono mai inviate a internet.
 
+> **Versione online:** la cartella [`web/`](web/) contiene la versione per il sito pubblico (conversione nel browser, pubblicità ai lati). Vedi [`web/DEPLOY.md`](web/DEPLOY.md). Quella descritta qui sotto è la versione locale in Python.
+
 ## Funzioni
 - Navigazione tra le cartelle con il tasto **Sfoglia…** (input e output) oppure incolla il percorso.
 - **Miniature** di tutte le foto HEIC della cartella.

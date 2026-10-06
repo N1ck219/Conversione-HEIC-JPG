@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Privacy e cookie – Convertitore HEIC in JPG</title>
+<meta name="robots" content="index,follow">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="page">
+  <p><a href="index.html">← Torna al convertitore</a></p>
+  <h1>Privacy e cookie</h1>
+  <p class="hint">Ultimo aggiornamento: <span id="upd"></span></p>
+
+  <h2>Le tue foto</h2>
+  <p>La conversione HEIC → JPG avviene <strong>interamente nel tuo browser</strong>. Le foto non vengono caricate, inviate né salvate su alcun server: non possiamo vederle.</p>
+
+  <h2>Dati raccolti dal sito</h2>
+  <p>Il sito non richiede registrazione e non usa cookie propri né strumenti di analisi. Il fornitore dell'hosting può registrare dati tecnici di accesso (come l'indirizzo IP) per il funzionamento e la sicurezza del servizio.</p>
+
+  <h2>Pubblicità e cookie di terze parti</h2>
+  <p>Per sostenere il sito mostriamo annunci tramite Google AdSense, <strong>solo se dai il consenso</strong> con il banner. Google e i suoi partner possono usare cookie e identificativi per mostrare e misurare gli annunci, anche personalizzati. Se rifiuti, nessun annuncio e nessun cookie di terze parti viene caricato.</p>
+  <p>Puoi cambiare idea in qualsiasi momento con il link “Gestisci consenso pubblicità” in fondo alla pagina. Per saperne di più su come Google usa i dati: <a href="https://policies.google.com/technologies/partner-sites" rel="noopener">policies.google.com/technologies/partner-sites</a>.</p>
+
+  <h2>Memoria del browser</h2>
+  <p>Salviamo nel tuo browser (localStorage) soltanto la tua scelta sul consenso alla pubblicità, per non chiedertela a ogni visita.</p>
+
+  <h2>I tuoi diritti</h2>
+  <p>Ai sensi del GDPR puoi chiedere accesso, rettifica o cancellazione dei dati che ti riguardano e proporre reclamo al Garante per la protezione dei dati personali (<a href="https://www.garanteprivacy.it" rel="noopener">garanteprivacy.it</a>).</p>
+
+  <h2>Contatti</h2>
+  <p>Per qualsiasi richiesta: <span id="mail"></span></p>
+</div>
+<script src="site-config.js"></script>
+<script>
+  document.getElementById("upd").textContent = new Date(document.lastModified).toLocaleDateString("it-IT");
+  const m = (window.SITE || {}).contactEmail || "";
+  const a = document.createElement("a"); a.href = "mailto:" + m; a.textContent = m;
+  document.getElementById("mail").appendChild(a);
+</script>
+</body>
+</html>
