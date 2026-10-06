@@ -89,16 +89,29 @@ async function addFiles(list) {
   const all = [...list], good = all.filter(isHeic);
   const known = new Set(items.map(i => i.file.name + i.file.size));
   const fresh = good.filter(f => !known.has(f.name + f.size)).sort((a, b) => a.name.localeCompare(b.name, undefined, {numeric: true}));
-  fresh.forEach(f => { const it = {file: f, name: f.name, state: "idle"}; createCard(it); items.push(it); $("grid").appendChild(it.el); });
+  const added = fresh.map(f => {
+    const it = {file: f, name: f.name, state: "idle"}; createCard(it); items.push(it); $("grid").appendChild(it.el); return it;
+  });
   if (!good.length && all.length) setStatus("Nessuna foto HEIC/HEIF tra i file scelti.", true);
   else setStatus("");
   $("done").hidden = true; results = [];
   buttons();
   if (!fresh.length) return;
+  await quickThumbs(added);                    // anteprime immediate (miniatura incorporata nel file)
   if ($("autoStart").checked) startConvert(); else previewThumbs();
 }
 
-// miniature in background (solo se la conversione non parte da sola)
+// anteprima istantanea: legge la miniatura già presente nel file HEIC, senza decodificare la foto
+async function quickThumbs(list) {
+  for (const it of list) {
+    if (it.removed || it.thumb) continue;
+    const url = await window.quickThumb(it.file);
+    if (url && !it.removed && !it.thumb) { it.thumb = url; updateCard(it); }
+    else if (url) URL.revokeObjectURL(url);
+  }
+}
+
+// miniature in background per le foto senza anteprima incorporata (solo se la conversione non parte da sola)
 async function previewThumbs() {
   if (thumbRunning) return;
   thumbRunning = true;
