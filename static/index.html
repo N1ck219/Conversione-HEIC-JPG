@@ -5,83 +5,158 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Convertitore HEIC → JPG</title>
 <style>
-  :root { --bg:#f5f6f8; --card:#fff; --text:#1c1f24; --muted:#6b7280; --accent:#2563eb; --border:#d9dde3; --sel:#dbeafe; }
-  @media (prefers-color-scheme: dark) {
-    :root { --bg:#16181d; --card:#1f232a; --text:#e8eaed; --muted:#9aa3af; --accent:#5b8cff; --border:#343a44; --sel:#1e3a66; }
+  :root {
+    --bg:#f3f5fb; --card:#ffffff; --text:#1b1f2a; --muted:#6b7385; --accent:#4f46e5; --accent2:#7c3aed;
+    --border:#e3e7f1; --sel:#eef0ff; --ok:#16a34a; --okbg:#e8f8ee; --err:#dc2626;
+    --shadow:0 1px 2px rgba(20,24,40,.05), 0 8px 24px rgba(20,24,40,.06);
+    --grad:linear-gradient(135deg,var(--accent),var(--accent2));
   }
-  * { box-sizing: border-box; }
-  body { margin:0; font:15px system-ui,sans-serif; background:var(--bg); color:var(--text); }
-  main { max-width:1100px; margin:0 auto; padding:16px; }
-  h1 { font-size:20px; margin:4px 0 14px; }
-  .card { background:var(--card); border:1px solid var(--border); border-radius:10px; padding:14px; margin-bottom:12px; }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg:#0e1017; --card:#171a23; --text:#e9ebf2; --muted:#98a0b3; --accent:#818cf8; --accent2:#a78bfa;
+      --border:#262b38; --sel:#212552; --ok:#4ade80; --okbg:#122a1c; --err:#f87171;
+      --shadow:0 1px 2px rgba(0,0,0,.4), 0 8px 24px rgba(0,0,0,.35); }
+  }
+  * { box-sizing:border-box; }
+  html { scroll-behavior:smooth; }
+  body { margin:0; font:15px/1.5 "Inter",system-ui,-apple-system,"Segoe UI",sans-serif; color:var(--text);
+    background:radial-gradient(900px 400px at 10% -10%, color-mix(in srgb,var(--accent) 16%,transparent), transparent),
+               radial-gradient(800px 400px at 100% 0%, color-mix(in srgb,var(--accent2) 14%,transparent), transparent), var(--bg);
+    background-attachment:fixed; min-height:100vh; }
+  main { max-width:1100px; margin:0 auto; padding:28px 18px 60px; }
+  header { display:flex; align-items:center; gap:14px; margin-bottom:22px; }
+  .logo { width:46px; height:46px; border-radius:14px; background:var(--grad); display:grid; place-items:center; font-size:24px;
+    box-shadow:0 6px 18px color-mix(in srgb,var(--accent) 45%,transparent); }
+  h1 { font-size:24px; margin:0; letter-spacing:-.02em; }
+  header p { margin:0; color:var(--muted); font-size:13px; }
+  .card { background:var(--card); border:1px solid var(--border); border-radius:16px; padding:18px; margin-bottom:16px;
+    box-shadow:var(--shadow); animation:rise .4s ease both; }
+  .card:nth-of-type(2){animation-delay:.05s} .card:nth-of-type(3){animation-delay:.1s}
+  @keyframes rise { from{opacity:0; transform:translateY(8px)} to{opacity:1; transform:none} }
+  .step { display:flex; align-items:center; gap:10px; font-weight:700; margin-bottom:12px; }
+  .step i { font-style:normal; width:26px; height:26px; border-radius:50%; background:var(--grad); color:#fff; display:grid; place-items:center; font-size:13px; }
   .row { display:flex; gap:8px; align-items:center; flex-wrap:wrap; }
   .row + .row { margin-top:10px; }
-  label.lbl { width:150px; font-weight:600; }
-  input[type=text] { flex:1; min-width:200px; padding:8px 10px; border:1px solid var(--border); border-radius:6px; background:var(--bg); color:var(--text); }
-  button { padding:8px 14px; border:1px solid var(--border); border-radius:6px; background:var(--card); color:var(--text); cursor:pointer; font:inherit; }
-  button:hover { border-color:var(--accent); }
-  button.primary { background:var(--accent); border-color:var(--accent); color:#fff; font-weight:600; }
+  label.lbl { width:140px; font-weight:600; color:var(--muted); font-size:13px; }
+  input[type=text], input[type=number] { flex:1; min-width:200px; padding:10px 12px; border:1px solid var(--border); border-radius:10px;
+    background:var(--bg); color:var(--text); font:inherit; transition:border-color .15s, box-shadow .15s; }
+  input:focus { outline:none; border-color:var(--accent); box-shadow:0 0 0 3px color-mix(in srgb,var(--accent) 25%,transparent); }
+  button { padding:9px 15px; border:1px solid var(--border); border-radius:10px; background:var(--card); color:var(--text); cursor:pointer;
+    font:inherit; font-weight:500; transition:transform .1s, border-color .15s, box-shadow .15s, background .15s; }
+  button:hover:not(:disabled) { border-color:var(--accent); transform:translateY(-1px); box-shadow:0 4px 12px rgba(20,24,40,.08); }
+  button:active:not(:disabled) { transform:none; }
+  button.primary { background:var(--grad); border:0; color:#fff; font-weight:600; padding:11px 22px; font-size:15px;
+    box-shadow:0 6px 16px color-mix(in srgb,var(--accent) 40%,transparent); }
+  button.primary:hover:not(:disabled) { box-shadow:0 8px 22px color-mix(in srgb,var(--accent) 55%,transparent); border:0; }
   button:disabled { opacity:.5; cursor:default; }
   .hint { color:var(--muted); font-size:13px; }
-  #grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(140px,1fr)); gap:10px; margin-top:12px; }
-  .thumb { position:relative; border:2px solid transparent; border-radius:8px; background:var(--bg); cursor:pointer; overflow:hidden; user-select:none; }
-  .thumb img { width:100%; aspect-ratio:1; object-fit:cover; display:block; background:#8884; }
-  .thumb span { display:block; font-size:12px; padding:4px 6px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  input[type=range] { accent-color:var(--accent); vertical-align:middle; }
+  #grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(140px,1fr)); gap:12px; margin-top:14px; }
+  .thumb { position:relative; border:2px solid transparent; border-radius:12px; background:var(--bg); cursor:pointer; overflow:hidden;
+    user-select:none; transition:transform .15s, box-shadow .15s, border-color .15s; }
+  .thumb:hover { transform:translateY(-3px); box-shadow:var(--shadow); }
+  .thumb img { width:100%; aspect-ratio:1; object-fit:cover; display:block; background:linear-gradient(90deg,#8883,#8886,#8883); }
+  .thumb span { display:block; font-size:12px; padding:5px 8px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
   .thumb.sel { border-color:var(--accent); background:var(--sel); }
-  .thumb.sel::after { content:"✓"; position:absolute; top:6px; right:6px; background:var(--accent); color:#fff; width:22px; height:22px; border-radius:50%; text-align:center; line-height:22px; font-size:14px; }
-  .thumb.done { opacity:.55; }
-  progress { width:100%; height:14px; }
-  #status { margin-top:8px; }
-  .err { color:#dc2626; }
+  .thumb.sel::after { content:"✓"; position:absolute; top:7px; right:7px; background:var(--grad); color:#fff; width:24px; height:24px;
+    border-radius:50%; text-align:center; line-height:24px; font-size:14px; box-shadow:0 2px 8px rgba(0,0,0,.3); animation:pop .2s ease; }
+  @keyframes pop { from{transform:scale(0)} to{transform:scale(1)} }
+  .thumb.done img { filter:saturate(.6) brightness(.8); }
+  .thumb.done::before { content:"Convertita"; position:absolute; left:0; right:0; bottom:28px; text-align:center; font-size:11px; font-weight:700;
+    color:#fff; background:rgba(22,163,74,.9); padding:2px 0; z-index:1; }
+  .empty { grid-column:1/-1; text-align:center; color:var(--muted); padding:36px 0; border:2px dashed var(--border); border-radius:14px; }
+  .empty b { display:block; font-size:30px; }
+  /* avanzamento */
+  #progWrap { margin-top:16px; }
+  .bar { height:14px; border-radius:99px; background:var(--border); overflow:hidden; }
+  .bar > div { height:100%; width:0; border-radius:99px; background:var(--grad); transition:width .3s ease; position:relative; overflow:hidden; }
+  .bar.running > div::after { content:""; position:absolute; inset:0; background:linear-gradient(90deg,transparent,rgba(255,255,255,.45),transparent);
+    animation:shine 1.2s infinite; }
+  @keyframes shine { from{transform:translateX(-100%)} to{transform:translateX(100%)} }
+  .stats { display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:10px; margin-top:12px; }
+  .stat { background:var(--bg); border:1px solid var(--border); border-radius:12px; padding:10px 12px; }
+  .stat small { display:block; color:var(--muted); font-size:12px; }
+  .stat b { font-size:20px; font-variant-numeric:tabular-nums; letter-spacing:-.01em; }
+  #status { margin-top:10px; }
+  .err { color:var(--err); }
+  /* messaggio finale */
+  #done { margin-top:16px; padding:18px; border-radius:14px; background:var(--okbg); border:1px solid color-mix(in srgb,var(--ok) 40%,transparent);
+    display:flex; gap:16px; align-items:center; flex-wrap:wrap; animation:pop .35s ease; }
+  #done[hidden] { display:none; }
+  #done .tick { width:48px; height:48px; border-radius:50%; background:var(--ok); color:#fff; display:grid; place-items:center; font-size:26px; }
+  #done h2 { margin:0; font-size:18px; }
+  #done p { margin:2px 0 0; color:var(--muted); font-size:13px; word-break:break-all; }
+  #done .txt { flex:1; min-width:200px; }
   /* finestra sfoglia cartelle */
-  dialog { border:1px solid var(--border); border-radius:10px; background:var(--card); color:var(--text); width:min(560px,94vw); padding:0; }
-  dialog::backdrop { background:#0007; }
-  .dlg-h { padding:12px 14px; border-bottom:1px solid var(--border); }
-  #dlgPath { font-family:monospace; font-size:13px; word-break:break-all; margin-top:6px; color:var(--muted); }
+  dialog { border:1px solid var(--border); border-radius:16px; background:var(--card); color:var(--text); width:min(560px,94vw); padding:0;
+    box-shadow:0 20px 60px rgba(0,0,0,.35); }
+  dialog[open] { animation:rise .2s ease; }
+  dialog::backdrop { background:#0009; backdrop-filter:blur(3px); }
+  .dlg-h { padding:14px 16px; border-bottom:1px solid var(--border); }
+  #dlgPath { font-family:ui-monospace,Consolas,monospace; font-size:12px; word-break:break-all; margin-top:6px; color:var(--muted); }
   #dlgList { height:320px; overflow:auto; }
-  .dir { padding:8px 14px; cursor:pointer; border-bottom:1px solid var(--border); }
-  .dir:hover { background:var(--sel); }
-  .dlg-f { padding:12px 14px; display:flex; gap:8px; justify-content:flex-end; border-top:1px solid var(--border); }
+  .dir { padding:9px 16px; cursor:pointer; border-bottom:1px solid var(--border); transition:background .1s, padding .1s; }
+  .dir:hover { background:var(--sel); padding-left:20px; }
+  .dlg-f { padding:12px 16px; display:flex; gap:8px; justify-content:flex-end; border-top:1px solid var(--border); }
+  @media (max-width:600px) { label.lbl { width:100%; } }
 </style>
 </head>
 <body>
 <main>
-  <h1>Convertitore HEIC → JPG</h1>
+  <header>
+    <div class="logo">📷</div>
+    <div><h1>Convertitore HEIC → JPG</h1><p>Tutto resta sul tuo computer: le foto non vengono mai inviate online.</p></div>
+  </header>
 
   <div class="card">
+    <div class="step"><i>1</i> Scegli le cartelle</div>
     <div class="row">
       <label class="lbl">Cartella di input</label>
       <input type="text" id="inPath" placeholder="Percorso della cartella con le foto HEIC">
-      <button id="inBrowse">Sfoglia…</button>
+      <button id="inBrowse">📂 Sfoglia…</button>
       <button id="inLoad">Carica</button>
     </div>
     <div class="row">
       <label class="lbl">Cartella di output</label>
       <input type="text" id="outPath" placeholder="Dove creare la cartella “Foto convertite”">
-      <button id="outBrowse">Sfoglia…</button>
+      <button id="outBrowse">📂 Sfoglia…</button>
     </div>
-    <div class="hint" id="outHint" style="margin-top:6px"></div>
+    <div class="hint" id="outHint" style="margin-top:8px"></div>
   </div>
 
   <div class="card">
+    <div class="step"><i>2</i> Seleziona le foto</div>
     <div class="row">
       <button id="selAll">Seleziona tutte</button>
       <button id="selNone">Deseleziona</button>
-      <span>Prime <input type="number" id="firstN" value="10" min="1" style="width:70px;padding:7px"></span>
+      <span>Prime <input type="number" id="firstN" value="10" min="1" style="width:80px;min-width:0;padding:8px"></span>
       <button id="selFirst">Seleziona</button>
       <span style="flex:1"></span>
       <label>Qualità <input type="range" id="quality" min="50" max="100" value="90"> <b id="qVal">90</b></label>
     </div>
-    <div class="hint" style="margin-top:6px">Clicca le miniature per sceglierle · Shift+clic per un intervallo.</div>
+    <div class="hint" style="margin-top:8px">Clicca le miniature per sceglierle · Shift+clic per un intervallo.</div>
     <div id="grid"></div>
   </div>
 
   <div class="card">
+    <div class="step"><i>3</i> Converti</div>
     <div class="row">
       <button class="primary" id="convert" disabled>Converti selezionate (0)</button>
-      <progress id="prog" value="0" max="1" hidden></progress>
+    </div>
+    <div id="progWrap" hidden>
+      <div class="bar running" id="bar"><div id="barFill"></div></div>
+      <div class="stats">
+        <div class="stat"><small>Avanzamento</small><b id="stProg">0/0</b></div>
+        <div class="stat"><small>Tempo trascorso</small><b id="stElapsed">0s</b></div>
+        <div class="stat"><small>Tempo rimanente</small><b id="stLeft">calcolo…</b></div>
+        <div class="stat"><small>Tempo totale stimato</small><b id="stTotal">calcolo…</b></div>
+      </div>
     </div>
     <div id="status" class="hint"></div>
+    <div id="done" hidden>
+      <div class="tick">✓</div>
+      <div class="txt"><h2 id="doneTitle">Lavoro finito!</h2><p id="doneSub"></p></div>
+      <button class="primary" id="openFolder">📁 Apri cartella</button>
+    </div>
   </div>
 </main>
 
@@ -158,6 +233,7 @@ async function loadFiles() {
 // ---- miniature
 function renderGrid() {
   const g = $("grid"); g.innerHTML = "";
+  if (!files.length) g.innerHTML = '<div class="empty"><b>🖼️</b>Nessuna foto da mostrare. Scegli una cartella con file HEIC.</div>';
   files.forEach((name, i) => {
     const d = document.createElement("div"); d.className = "thumb"; d.dataset.i = i;
     const img = document.createElement("img"); img.loading = "lazy"; img.alt = name;
@@ -193,23 +269,53 @@ $("selFirst").onclick = () => {
 };
 $("quality").oninput = () => $("qVal").textContent = $("quality").value;
 
-// ---- conversione (un file alla volta, per mostrare l'avanzamento)
+// ---- conversione (un file alla volta, per mostrare l'avanzamento e le stime)
+function fmt(sec) {
+  sec = Math.max(0, Math.round(sec));
+  const h = Math.floor(sec / 3600), m = Math.floor(sec % 3600 / 60), s = sec % 60;
+  return h ? `${h}h ${m}m` : m ? `${m}m ${String(s).padStart(2, "0")}s` : `${s}s`;
+}
+let lastOutDir = "";
+$("openFolder").onclick = async () => {
+  try { await api("/api/open", {path: lastOutDir}); } catch (e) { setStatus(e.message, true); }
+};
 $("convert").onclick = async () => {
   const out = $("outPath").value.trim();
   if (!out) return setStatus("Scegli la cartella di output.", true);
-  const idx = [...selected].sort((a, b) => a - b);
-  $("convert").disabled = true; $("prog").hidden = false; $("prog").max = idx.length; $("prog").value = 0;
-  let ok = 0, errors = [], outDir = "";
+  const idx = [...selected].sort((a, b) => a - b), total = idx.length;
+  document.querySelectorAll(".thumb.done").forEach(t => t.classList.remove("done"));
+  $("convert").disabled = true; $("done").hidden = true; $("progWrap").hidden = false;
+  $("bar").classList.add("running"); $("barFill").style.width = "0%";
+  $("stProg").textContent = `0/${total}`; $("stLeft").textContent = $("stTotal").textContent = "calcolo…";
+  const t0 = performance.now();
+  const tick = setInterval(() => {   // aggiorna il tempo trascorso anche durante un file lento
+    $("stElapsed").textContent = fmt((performance.now() - t0) / 1000);
+  }, 500);
+  let ok = 0, errors = [];
   for (const [n, i] of idx.entries()) {
-    setStatus(`Converto ${files[i]} (${n + 1}/${idx.length})…`);
+    setStatus(`Converto ${files[i]}…`);
     try {
       const r = await api("/api/convert", {folder: loadedFolder, out_parent: out, name: files[i], quality: +$("quality").value});
-      outDir = r.out_dir; ok++;
+      lastOutDir = r.out_dir; ok++;
       document.querySelector(`.thumb[data-i="${i}"]`).classList.add("done");
     } catch (e) { errors.push(`${files[i]}: ${e.message}`); }
-    $("prog").value = n + 1;
+    const done = n + 1, elapsed = (performance.now() - t0) / 1000, perFile = elapsed / done;
+    $("barFill").style.width = `${done / total * 100}%`;
+    $("stProg").textContent = `${done}/${total}`;
+    $("stElapsed").textContent = fmt(elapsed);
+    $("stLeft").textContent = done < total ? "~" + fmt(perFile * (total - done)) : "0s";
+    $("stTotal").textContent = "~" + fmt(perFile * total);
   }
-  setStatus(`Fatto: ${ok} convertite${errors.length ? ", " + errors.length + " errori (" + errors.slice(0, 3).join("; ") + ")" : ""}. ${outDir ? "Salvate in " + outDir : ""}`, errors.length > 0);
+  clearInterval(tick);
+  const elapsed = (performance.now() - t0) / 1000;
+  $("bar").classList.remove("running");
+  $("stElapsed").textContent = $("stTotal").textContent = fmt(elapsed); $("stLeft").textContent = "0s";
+  setStatus(errors.length ? `${errors.length} errori: ${errors.slice(0, 3).join("; ")}` : "", errors.length > 0);
+  if (ok) {
+    $("doneTitle").textContent = "Lavoro finito! 🎉";
+    $("doneSub").textContent = `${ok} ${ok === 1 ? "foto convertita" : "foto convertite"} in ${fmt(elapsed)} · ${lastOutDir}`;
+    $("done").hidden = false; $("done").scrollIntoView({behavior: "smooth", block: "nearest"});
+  }
   refresh();
 };
 </script>

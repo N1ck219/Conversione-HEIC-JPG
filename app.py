@@ -6,6 +6,8 @@ Il server ascolta solo su questo computer.
 import json
 import os
 import string
+import subprocess
+import sys
 import threading
 import webbrowser
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
@@ -69,6 +71,20 @@ def convert(folder, out_parent, name, quality):
     return {"output": str(dest), "out_dir": str(out_dir)}
 
 
+def open_folder(path):
+    """Apre la cartella nel file manager del sistema (l'app gira in locale)."""
+    p = Path(path).expanduser().resolve()
+    if not p.is_dir():
+        raise NotADirectoryError(f"Cartella non trovata: {p}")
+    if os.name == "nt":
+        os.startfile(p)  # noqa: S606
+    elif sys.platform == "darwin":
+        subprocess.Popen(["open", str(p)])
+    else:
+        subprocess.Popen(["xdg-open", str(p)])
+    return {"opened": str(p)}
+
+
 class Handler(BaseHTTPRequestHandler):
     def log_message(self, *args):
         pass
@@ -115,6 +131,8 @@ class Handler(BaseHTTPRequestHandler):
             body = json.loads(self.rfile.read(int(self.headers.get("Content-Length", 0))))
             if urlparse(self.path).path == "/api/convert":
                 return self._send(200, convert(body["folder"], body["out_parent"], body["name"], body.get("quality", 90)))
+            if urlparse(self.path).path == "/api/open":
+                return self._send(200, open_folder(body["path"]))
             return self._send(404, {"error": "non trovato"})
         except Exception as e:  # noqa: BLE001
             return self._send(400, {"error": str(e)})

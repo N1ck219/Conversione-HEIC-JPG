@@ -10,6 +10,8 @@ Le foto non vengono mai inviate a internet.
 - Selezione: clic sulle miniature, Shift+clic per un intervallo, "Seleziona tutte", "Prime N".
 - Qualità JPG regolabile (50–100, predefinita 90).
 - Nella cartella di output scelta viene creata sempre la sottocartella **`Foto convertite`**.
+- Durante la conversione: barra di avanzamento con **tempo trascorso, rimanente e totale stimato**.
+- A lavoro finito compare un messaggio di conferma e il tasto **Apri cartella** per aprire la cartella con le foto convertite.
 - Orientamento corretto ed EXIF mantenuti. I file esistenti non vengono sovrascritti (`foto.jpg`, `foto_1.jpg`, …).
 
 ## Requisiti
