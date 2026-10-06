@@ -12,6 +12,8 @@ La cartella `web/` è un sito **statico** (nessun server): la conversione avvien
 Alternativa: Netlify (trascina la cartella `web` su <https://app.netlify.com/drop>).
 Evita GitHub Pages (i termini vietano attività commerciali) e il piano gratuito di Vercel (solo uso non commerciale).
 
+> **Nota:** Cloudflare ora propone la procedura "Workers" (con tasto *Deploy*). Il file `wrangler.jsonc` nella radice del repository la rende compatibile: lascia *Build command* vuoto, *Deploy command* predefinito (`npx wrangler deploy`) e *Root directory* vuota. Il branch di produzione si cambia in *Settings → Builds → Branch control*.
+
 ## 2. Configurazione (`web/site-config.js`)
 - `contactEmail`: **metti la tua email**, compare nella pagina privacy.
 - `adsenseClient` e `adSlots`: vedi sotto. Finché `adsenseClient` è vuoto, il sito non mostra annunci né banner cookie.
